@@ -55,3 +55,44 @@ end
    3. Examples: concrete input.output pairs in where:block
    4. Code: the body, written last
 |#
+
+#|if/else and ask expressions
+if x == 0:
+  1
+else if x > 0
+  x * 2
+  else:
+  x * -1
+end
+
+#ask expression
+ask:
+  | x == 0 then: 1
+  | x > 0 then: x * 2
+  | otherswise: x * -1
+end
+|#
+
+fun grade(marks :: Number) -> String:
+  doc: "returns the letter grade for a mark out of 100"
+  ask:
+    | marks >= 90 then: "A"
+    | marks >= 80 then: "B"
+    | marks >= 70 then: "C"
+    | marks >= 60 then: "D"
+    | otherwise: "F"
+  end
+where:
+  grade(95) is "A"
+  grade(85) is "B"
+  grade(75) is "C"
+  grade(65) is "D"
+  grade(45) is "F"
+  # the boundaries
+  grade(90) is "A"
+  grade(60) is "D"
+  grade(59) is "F"
+  grade(100) is "A"
+  grade(0) is "F"
+end
+
