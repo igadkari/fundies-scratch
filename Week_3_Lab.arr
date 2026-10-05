@@ -1,4 +1,7 @@
-use context starter2024
+use context dcic2024
+include csv
+include data-source
+
 # Problem 1
 # Checks if a year is a leap year
 fun leap-year(year :: Number) -> Boolean:
@@ -101,3 +104,34 @@ mars = planets.row-n(3)
 
 # Gets the distance from Mars
 mars-distance = mars["Distance"]
+
+
+# Problem 5
+# Loads the Bank of England rate data
+
+something =
+  load-table:
+    year :: Number,
+    day :: Number,
+    month :: String,
+    rate :: Number
+    source: csv-table-file("boe_rates.csv", default-options)
+    sanitize year using num-sanitizer
+    sanitize day using num-sanitizer
+    sanitize rate using num-sanitizer
+  end
+
+# Total number of rows
+something.length()
+
+# Median rate
+median(something, "rate")
+
+# Mode rate
+modes(something, "rate")
+
+# Rates in ascending order
+order-by(something, "rate", true)
+
+# Rates in descending order
+order-by(something, "rate", false)
