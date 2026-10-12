@@ -3,7 +3,7 @@ use context dcic2024
 include csv
 include data-source
 
-# load the flights table
+# Load flights
 flights = load-table:
   rownames :: Number,
   dep_time :: Number,
@@ -38,15 +38,16 @@ flights = load-table:
 end
 
 
-# exercise 1
+# Exercise 1
+
+# Find flights that are at least 1500 miles
 fun is_long_flight(row :: Row) -> Boolean:
-  doc: "Checks whether a flight travels at least 1500 miles."
   row["distance"] >= 1500
 end
 
 long_flights = filter-with(flights, is_long_flight)
 
-# sort by airtime, longest first
+# Sort by airtime, longest first
 long_flights_sorted = order-by(long_flights, "air_time", false)
 
 longest_flight = long_flights_sorted.row-n(0)
@@ -56,36 +57,27 @@ longest_origin = longest_flight["origin"]
 longest_dest = longest_flight["dest"]
 
 
-# exercise 2
-fun is_delayed_departure(row :: Row) -> Boolean:
-  doc: "Checks whether departure was delayed by at least 30 minutes."
-  row["dep_delay"] >= 30
-end
+# Exercise 2
 
-fun is_morning_sched_dep(row :: Row) -> Boolean:
-  doc: "Checks whether scheduled departure is before noon."
-  row["sched_dep_time"] < 1200
-end
-
-# filter delayed flights
+# Find flights delayed by at least 30 minutes
 delayed_flights = filter-with(
   flights,
   lam(row): row["dep_delay"] >= 30 end
 )
 
-# keep morning flights
+# Keep flights scheduled before noon
 morning_delayed_flights = filter-with(
   delayed_flights,
   lam(row): row["sched_dep_time"] < 1200 end
 )
 
-# keep flights over 500 miles
+# Keep flights travelling more than 500 miles
 long_morning_delays = filter-with(
   morning_delayed_flights,
   lam(row): row["distance"] > 500 end
 )
 
-# sort by delay, worst first
+# Sort by the biggest delay
 worst_delays = order-by(long_morning_delays, "dep_delay", false)
 
 worst_delayed_flight = worst_delays.row-n(0)
@@ -95,9 +87,9 @@ worst_flight_origin = worst_delayed_flight["origin"]
 worst_flight_delay = worst_delayed_flight["dep_delay"]
 
 
-# exercise 3
+# Exercise 3
 
-# replace negative departure delays with 0
+# Change negative departure delays to 0
 cleaned_departure_delays = transform-column(
   flights,
   "dep_delay",
@@ -110,7 +102,7 @@ cleaned_departure_delays = transform-column(
   end
 )
 
-# replace negative arrival delays with 0
+# Change negative arrival delays to 0
 cleaned_flights = transform-column(
   cleaned_departure_delays,
   "arr_delay",
@@ -123,7 +115,7 @@ cleaned_flights = transform-column(
   end
 )
 
-# calculate effective speed
+# Calculate speed in miles per hour
 flights_with_speed = build-column(
   cleaned_flights,
   "effective_speed",
@@ -136,7 +128,7 @@ flights_with_speed = build-column(
   end
 )
 
-# sort by speed, fastest first
+# Sort by speed, fastest first
 fastest_flights = order-by(
   flights_with_speed,
   "effective_speed",
@@ -150,9 +142,10 @@ fastest_origin = fastest_flight["origin"]
 fastest_dest = fastest_flight["dest"]
 
 
-# exercise 4
+# Exercise 4
+
+# Reduce arrival delays by 20% when they are between 0 and 45 minutes
 fun apply-arrival-discount(t :: Table) -> Table:
-  doc: "Reduces arrival delays by 20% when the delay is between 0 and 45 minutes."
   transform-column(
     t,
     "arr_delay",
@@ -182,11 +175,9 @@ where:
   end
 end
 
-# apply the discount to flights
 discounted_flights = apply-arrival-discount(flights)
 
-# calculate the on-time score
-# treat negative delays as 0
+# Calculate the on-time score
 flights_with_score = build-column(
   discounted_flights,
   "on_time_score",
@@ -215,14 +206,13 @@ flights_with_score = build-column(
   end
 )
 
-# sort by distance first, then score
+# Sort by score, using distance to break ties
 score_sorted = order-by(
   order-by(flights_with_score, "distance", true),
   "on_time_score",
   false
 )
 
-# get the top two flights
 top_flight_1 = score_sorted.row-n(0)
 top_flight_2 = score_sorted.row-n(1)
 
@@ -237,8 +227,15 @@ top_origin_2 = top_flight_2["origin"]
 top_dest_2 = top_flight_2["dest"]
 
 
-# optional question
+# Optional question:
 # I don't think this is completely fair because longer flights
-# lose more points from the airtime part of the formula.
-# One alternative is to score delays as a percentage of the
-# flight time, so short and long flights can be compared more fairly.
+# get a bigger penalty from airtime. I would compare delays
+# as a percentage of the scheduled flight time instead.
+
+
+# Show the results
+longest_flight
+worst_delayed_flight
+fastest_flight
+top_flight_1
+top_flight_2
