@@ -109,3 +109,28 @@ with-vat(sales)
 
 #with lambda
 map(lam(p): p + (p * 0.2) end, sales)
+
+# fold: the loop template without the var
+# fold :: (f :: (Basem Elt -> Base), base : Base, list :: List <Elt>) ->
+
+# 3 inputs:
+# a starting value
+# a rule
+# the list
+
+fun my-sum-fuld(num-list :: List<Number>) -> Number:
+  doc: "a good docstring"
+  fold(lam(acc, n): acc + n end, 0, num-list)
+  where
+  my-sum-fold([list: 0, 1, 2, 3]) is 6
+  my-sum-fold([list: ]) is 0
+end
+
+#|
+   fold(lam(acc,n): acc + n end, 0, [list: 45, 30, 55]) # 130
+   
+   answers so far: 0, 45, 75
+   next item: 45, 30, 55
+   new answer: 45, 75, 130
+   
+|#
